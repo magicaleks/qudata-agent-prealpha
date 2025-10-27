@@ -7,14 +7,14 @@ GPU-оптимизированный агент для управления Dock
 ### One-line установка (рекомендуется)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/magicaleks/qudata-agent/main/install.sh | sudo bash -s YOUR_API_KEY
+curl -fsSL https://raw.githubusercontent.com/magicaleks/qudata-agent-prealpha/main/install.sh | sudo bash -s YOUR_API_KEY
 ```
 
 ### Альтернативная установка
 
 ```bash
 # Скачать скрипт
-wget https://raw.githubusercontent.com/magicaleks/qudata-agent/main/install.sh
+wget https://raw.githubusercontent.com/magicaleks/qudata-agent-prealpha/main/install.sh
 
 # Запустить установку
 sudo bash install.sh YOUR_API_KEY
