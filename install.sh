@@ -30,13 +30,13 @@ if [ -z "$1" ]; then
     echo "  sudo bash install.sh <API_KEY>"
     echo ""
     echo "Quick install (one-line):"
-    echo "  curl -fsSL https://raw.githubusercontent.com/magicaleks/qudata-agent-v2/main/install.sh | sudo bash -s <API_KEY>"
+    echo "  curl -fsSL https://raw.githubusercontent.com/magicaleks/qudata-agent-prealpha/main/install.sh | sudo bash -s <API_KEY>"
     echo ""
     exit 1
 fi
 
 API_KEY="$1"
-REPO_URL="https://github.com/magicaleks/qudata-agent-v2.git"
+REPO_URL="https://github.com/magicaleks/qudata-agent-prealpha.git"
 INSTALL_DIR="/opt/qudata-agent"
 
 echo -e "${BLUE}API Key: ${API_KEY:0:8}...${NC}"
