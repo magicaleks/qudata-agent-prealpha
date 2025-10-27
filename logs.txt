@@ -1,0 +1,221 @@
+2025-10-20 16:09:49,313 - __main__ - INFO - Stats sent: running
+2025-10-20 16:09:52,373 - src.service.health - INFO - Container d1eff8b99b09 Docker status: running
+2025-10-20 16:09:52,373 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:09:53,397 - __main__ - INFO - Stats sent: running
+2025-10-20 16:09:57,413 - __main__ - INFO - Stats sent: running
+2025-10-20 16:10:01,433 - __main__ - INFO - Stats sent: running
+2025-10-20 16:10:05,459 - __main__ - INFO - Stats sent: running
+2025-10-20 16:10:09,481 - __main__ - INFO - Stats sent: running
+2025-10-20 16:10:13,506 - __main__ - INFO - Stats sent: running
+2025-10-20 16:10:17,530 - __main__ - INFO - Stats sent: running
+2025-10-20 16:10:21,554 - __main__ - INFO - Stats sent: running
+2025-10-20 16:10:23,192 - __main__ - INFO - Received signal 2, initiating shutdown
+2025-10-20 16:10:23,193 - __main__ - INFO - Agent shutdown complete
+2025-10-20 16:10:24,852 - __main__ - INFO - === QuData Agent Starting ===
+2025-10-20 16:10:27,627 - src.service.system_check - INFO - === System Status ===
+2025-10-20 16:10:27,627 - src.service.system_check - INFO - ✓ docker
+2025-10-20 16:10:27,627 - src.service.system_check - INFO - ✓ nvidia-smi
+2025-10-20 16:10:27,627 - src.service.system_check - INFO - ✓ lscpu
+2025-10-20 16:10:27,628 - src.service.system_check - INFO - ✓ ethtool
+2025-10-20 16:10:27,628 - src.service.system_check - INFO - ✓ dmidecode
+2025-10-20 16:10:27,628 - src.service.system_check - INFO - ✓ docker_running
+2025-10-20 16:10:27,628 - src.service.system_check - INFO - ✗ docker_nvidia
+2025-10-20 16:10:27,628 - src.service.system_check - INFO - ====================
+2025-10-20 16:10:27,869 - __main__ - INFO - Docker is running, syncing state...
+2025-10-20 16:10:27,908 - src.service.health - INFO - Container d1eff8b99b09 Docker status: running
+2025-10-20 16:10:27,909 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:10:27,909 - __main__ - INFO - Initializing agent (attempt 1/3)
+2025-10-20 16:10:27,975 - __main__ - INFO - Agent initialized: False
+2025-10-20 16:10:27,975 - __main__ - INFO - Collecting host configuration...
+2025-10-20 16:10:28,336 - src.service.gpu_info - WARNING - nvidia-smi not available or no GPUs found
+2025-10-20 16:10:28,351 - __main__ - INFO - Host info collected: GPU=N/Ax0, RAM=1.92GB
+2025-10-20 16:10:28,372 - __main__ - INFO - Host registered successfully
+2025-10-20 16:10:28,373 - __main__ - INFO - Stats heartbeat thread started
+2025-10-20 16:10:28,373 - __main__ - INFO - Starting server on port 1024
+2025-10-20 16:10:30,431 - src.service.health - INFO - Container d1eff8b99b09 Docker status: running
+2025-10-20 16:10:30,432 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:10:31,457 - __main__ - INFO - Stats sent: running
+2025-10-20 16:10:35,478 - __main__ - INFO - Stats sent: running
+2025-10-20 16:10:38,529 - src.service.health - INFO - Container d1eff8b99b09 Docker status: running
+2025-10-20 16:10:38,530 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:10:39,551 - __main__ - INFO - Stats sent: running
+2025-10-20 16:10:43,573 - __main__ - INFO - Stats sent: running
+2025-10-20 16:10:46,615 - src.service.health - INFO - Container d1eff8b99b09 Docker status: exited
+2025-10-20 16:10:46,615 - src.service.health - INFO - Container exited, updating state to 'paused'
+2025-10-20 16:10:47,634 - __main__ - INFO - Stats sent: paused
+2025-10-20 16:10:51,653 - __main__ - INFO - Stats sent: paused
+2025-10-20 16:10:54,704 - src.service.health - INFO - Container d1eff8b99b09 Docker status: exited
+2025-10-20 16:10:54,704 - src.service.health - INFO - State is in sync: paused
+2025-10-20 16:10:55,723 - __main__ - INFO - Stats sent: paused
+2025-10-20 16:10:59,746 - __main__ - INFO - Stats sent: paused
+2025-10-20 16:11:02,813 - src.service.health - INFO - Container d1eff8b99b09 Docker status: exited
+2025-10-20 16:11:02,814 - src.service.health - INFO - State is in sync: paused
+2025-10-20 16:11:03,836 - __main__ - INFO - Stats sent: paused
+2025-10-20 16:11:07,858 - __main__ - INFO - Stats sent: paused
+2025-10-20 16:11:10,906 - src.service.health - WARNING - Container d1eff8b99b09 in state but not found in Docker, state will be cleared
+2025-10-20 16:11:16,907 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:11:22,909 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:11:26,579 - src.server.resources - INFO - POST /instances request from 31.172.76.129
+2025-10-20 16:11:26,580 - src.server.resources - INFO - Received JSON data: {'image': 'nvidia/cuda:12.6.1-base-ubuntu22.04', 'image_tag': 'latest', 'storage_gb': 10, 'registry': None, 'login': None, 'password': None, 'env_variables': {}, 'ports': {}, 'command': None, 'ssh_enabled': True}
+2025-10-20 16:11:26,580 - src.server.resources - INFO - Creating instance: image=nvidia/cuda:12.6.1-base-ubuntu22.04:latest, cpu=1, ram=2GB, gpu=0, ports=[]
+2025-10-20 16:11:26,580 - src.service.instances - INFO - Using image with embedded tag: nvidia/cuda:12.6.1-base-ubuntu22.04
+2025-10-20 16:11:26,581 - src.service.instances - INFO - Creating instance with image nvidia/cuda:12.6.1-base-ubuntu22.04
+2025-10-20 16:11:26,581 - src.service.instances - INFO - No command specified, using idle mode: tail -f /dev/null
+2025-10-20 16:11:26,581 - src.service.instances - INFO - Executing docker run command
+2025-10-20 16:11:26,581 - src.service.instances - INFO - Docker command preview: docker run -d --cpus=1 --memory=2g ... nvidia/cuda:12.6.1-base-ubuntu22.04
+2025-10-20 16:11:26,581 - src.service.instances - INFO - Full command: docker run -d --cpus=1 --memory=2g -p 1025:22 nvidia/cuda:12.6.1-base-ubuntu22.04 tail -f /dev/null
+2025-10-20 16:11:26,961 - src.service.instances - INFO - Container '958f0540155a' started successfully.
+2025-10-20 16:11:26,962 - src.service.instances - INFO - SSH is enabled, starting SSH setup in background for container 958f0540155a
+2025-10-20 16:11:26,962 - src.service.instances - INFO - SSH setup started in background thread
+2025-10-20 16:11:26,963 - src.service.instances - INFO - Instance creation successful: ports={'22': '1025'}
+2025-10-20 16:11:26,963 - src.server.resources - INFO - Instance created successfully: {'22': '1025'}
+2025-10-20 16:11:26,962 - src.service.ssh_setup - INFO - Setting up SSH in container 958f0540155a
+2025-10-20 16:11:26,965 - src.service.ssh_setup - INFO - Executing: apt-get update -qq
+2025-10-20 16:11:29,005 - src.service.health - INFO - Container 958f0540155a Docker status: running
+2025-10-20 16:11:29,006 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:11:30,082 - __main__ - INFO - Stats sent: running
+2025-10-20 16:11:32,179 - src.service.ssh_setup - INFO - Executing: DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssh-server
+2025-10-20 16:11:34,109 - __main__ - INFO - Stats sent: running
+2025-10-20 16:11:37,231 - src.service.health - INFO - Container 958f0540155a Docker status: running
+2025-10-20 16:11:37,233 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:11:38,257 - __main__ - INFO - Stats sent: running
+2025-10-20 16:11:42,289 - __main__ - INFO - Stats sent: running
+2025-10-20 16:11:45,389 - src.service.health - INFO - Container 958f0540155a Docker status: running
+2025-10-20 16:11:45,391 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:11:45,570 - src.service.ssh_setup - INFO - Executing: mkdir -p /var/run/sshd
+2025-10-20 16:11:45,650 - src.service.ssh_setup - INFO - Executing: sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+2025-10-20 16:11:45,718 - src.service.ssh_setup - INFO - Executing: sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+2025-10-20 16:11:45,782 - src.service.ssh_setup - INFO - Executing: mkdir -p /root/.ssh
+2025-10-20 16:11:45,859 - src.service.ssh_setup - INFO - Executing: chmod 700 /root/.ssh
+2025-10-20 16:11:45,925 - src.service.ssh_setup - INFO - Executing: touch /root/.ssh/authorized_keys
+2025-10-20 16:11:45,990 - src.service.ssh_setup - INFO - Executing: chmod 600 /root/.ssh/authorized_keys
+2025-10-20 16:11:46,054 - src.service.ssh_setup - INFO - Starting SSH daemon
+2025-10-20 16:11:46,110 - src.service.ssh_setup - INFO - SSH daemon started successfully in container 958f0540155a
+2025-10-20 16:11:46,110 - src.service.instances - INFO - SSH setup completed successfully in container 958f0540155a
+2025-10-20 16:11:46,412 - __main__ - INFO - Stats sent: running
+2025-10-20 16:11:48,080 - src.server.resources - INFO - POST /ssh request from 31.172.76.129
+2025-10-20 16:11:48,081 - src.server.resources - INFO - Adding SSH key (length: 119 chars)
+2025-10-20 16:11:48,081 - src.service.ssh_keys - INFO - Adding SSH key to container 958f0540155a
+2025-10-20 16:11:48,465 - src.service.ssh_keys - INFO - SSH key added successfully to container 958f0540155a
+2025-10-20 16:11:48,466 - src.service.ssh_setup - INFO - Restarting SSH in container 958f0540155a
+2025-10-20 16:11:48,607 - src.service.ssh_setup - INFO - SSH daemon restarted successfully in container 958f0540155a
+2025-10-20 16:11:48,607 - src.server.resources - INFO - SSH key added successfully
+2025-10-20 16:11:50,434 - __main__ - INFO - Stats sent: running
+2025-10-20 16:11:53,478 - src.service.health - INFO - Container 958f0540155a Docker status: running
+2025-10-20 16:11:53,479 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:11:54,500 - __main__ - INFO - Stats sent: running
+2025-10-20 16:11:58,523 - __main__ - INFO - Stats sent: running
+2025-10-20 16:12:01,574 - src.service.health - INFO - Container 958f0540155a Docker status: running
+2025-10-20 16:12:01,574 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:12:02,597 - __main__ - INFO - Stats sent: running
+2025-10-20 16:12:06,618 - __main__ - INFO - Stats sent: running
+2025-10-20 16:12:09,667 - src.service.health - INFO - Container 958f0540155a Docker status: running
+2025-10-20 16:12:09,668 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:12:10,694 - __main__ - INFO - Stats sent: running
+2025-10-20 16:12:14,717 - __main__ - INFO - Stats sent: running
+2025-10-20 16:12:17,368 - src.server.resources - INFO - PUT /instances request from 31.172.76.129
+2025-10-20 16:12:17,369 - src.server.resources - INFO - Instance management action requested: stop
+2025-10-20 16:12:17,434 - src.service.instances - INFO - Container 958f0540155a Docker status: running
+2025-10-20 16:12:17,434 - src.service.instances - INFO - Executing action 'stop' on container 958f0540155a (current status: running)...
+2025-10-20 16:12:17,764 - src.service.health - INFO - Container 958f0540155a Docker status: running
+2025-10-20 16:12:17,764 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:12:18,789 - __main__ - INFO - Stats sent: running
+2025-10-20 16:12:22,811 - __main__ - INFO - Stats sent: running
+2025-10-20 16:12:25,854 - src.service.health - INFO - Container 958f0540155a Docker status: running
+2025-10-20 16:12:25,854 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:12:26,876 - __main__ - INFO - Stats sent: running
+2025-10-20 16:12:27,755 - src.service.instances - INFO - Action 'stop' completed successfully, new status: paused
+2025-10-20 16:12:27,756 - src.server.resources - INFO - Instance action 'stop' completed successfully
+2025-10-20 16:12:27,759 - src.server.resources - INFO - PUT /instances request from 31.172.76.129
+2025-10-20 16:12:27,759 - src.server.resources - INFO - Instance management action requested: stop
+2025-10-20 16:12:27,797 - src.service.instances - INFO - Container 958f0540155a Docker status: exited
+2025-10-20 16:12:27,798 - src.service.instances - WARNING - Container 958f0540155a is already stopped
+2025-10-20 16:12:27,798 - src.server.resources - INFO - Instance action 'stop' completed successfully
+2025-10-20 16:12:28,786 - src.server.resources - INFO - Stats sent after instance action: status=paused, cpu=4.0%, ram=25.3%
+2025-10-20 16:12:28,818 - src.server.resources - INFO - Stats sent after instance action: status=paused, cpu=0.0%, ram=25.3%
+2025-10-20 16:12:30,897 - __main__ - INFO - Stats sent: paused
+2025-10-20 16:12:33,942 - src.service.health - INFO - Container 958f0540155a Docker status: exited
+2025-10-20 16:12:33,943 - src.service.health - INFO - State is in sync: paused
+2025-10-20 16:12:34,962 - __main__ - INFO - Stats sent: paused
+2025-10-20 16:12:38,995 - __main__ - INFO - Stats sent: paused
+2025-10-20 16:12:42,052 - src.service.health - INFO - Container 958f0540155a Docker status: exited
+2025-10-20 16:12:42,053 - src.service.health - INFO - State is in sync: paused
+2025-10-20 16:12:43,076 - __main__ - INFO - Stats sent: paused
+2025-10-20 16:12:43,152 - src.server.resources - INFO - PUT /instances request from 31.172.76.129
+2025-10-20 16:12:43,152 - src.server.resources - INFO - Instance management action requested: start
+2025-10-20 16:12:43,192 - src.service.instances - INFO - Container 958f0540155a Docker status: exited
+2025-10-20 16:12:43,192 - src.service.instances - INFO - Executing action 'start' on container 958f0540155a (current status: exited)...
+2025-10-20 16:12:43,460 - src.service.instances - INFO - Action 'start' completed successfully, new status: running
+2025-10-20 16:12:43,461 - src.service.instances - INFO - Restarting SSH daemon after start
+2025-10-20 16:12:43,461 - src.server.resources - INFO - Instance action 'start' completed successfully
+2025-10-20 16:12:43,461 - src.service.ssh_setup - INFO - Restarting SSH in container 958f0540155a
+2025-10-20 16:12:43,617 - src.service.ssh_setup - INFO - SSH daemon restarted successfully in container 958f0540155a
+2025-10-20 16:12:44,485 - src.server.resources - INFO - Stats sent after instance action: status=running, cpu=16.2%, ram=25.4%
+2025-10-20 16:12:47,096 - __main__ - INFO - Stats sent: running
+2025-10-20 16:12:50,147 - src.service.health - INFO - Container 958f0540155a Docker status: running
+2025-10-20 16:12:50,148 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:12:51,170 - __main__ - INFO - Stats sent: running
+2025-10-20 16:12:55,190 - __main__ - INFO - Stats sent: running
+2025-10-20 16:12:58,240 - src.service.health - INFO - Container 958f0540155a Docker status: running
+2025-10-20 16:12:58,241 - src.service.health - INFO - State is in sync: running
+2025-10-20 16:12:59,232 - src.server.resources - INFO - DELETE /instances request from 31.172.76.129
+2025-10-20 16:12:59,232 - src.server.resources - INFO - Deleting instance: container_id=958f0540155a, status=running
+2025-10-20 16:12:59,232 - src.service.instances - INFO - Removing container 958f0540155a
+2025-10-20 16:12:59,262 - __main__ - INFO - Stats sent: running
+2025-10-20 16:12:59,698 - src.service.instances - INFO - Container 958f0540155a removed successfully
+2025-10-20 16:12:59,699 - src.service.instances - INFO - Instance deleted successfully
+2025-10-20 16:12:59,699 - src.server.resources - INFO - Instance deleted successfully
+2025-10-20 16:13:05,262 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:13:11,264 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:13:17,264 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:13:23,265 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:13:29,266 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:13:35,267 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:13:41,269 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:13:47,270 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:13:53,271 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:13:59,272 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:14:05,273 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:14:11,274 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:14:17,276 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:14:23,277 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:14:29,278 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:14:35,280 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:14:41,280 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:14:47,282 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:14:53,283 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:14:59,284 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:15:05,286 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:15:11,287 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:15:17,289 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:15:23,290 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:15:29,291 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:15:35,293 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:15:41,293 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:15:47,295 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:15:53,297 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:15:59,298 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:16:05,299 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:16:11,301 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:16:17,302 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:16:23,303 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:16:29,305 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:16:35,306 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:16:41,308 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:16:47,309 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:16:53,311 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:16:59,313 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:17:05,315 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:17:11,316 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:17:17,318 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:17:23,319 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:17:29,321 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:17:35,322 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:17:41,324 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:17:47,325 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:17:53,327 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:17:59,328 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:18:05,330 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:18:11,332 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:18:17,333 - src.service.health - INFO - State is clean (destroyed), no sync needed
+2025-10-20 16:18:23,335 - src.service.health - INFO - State is clean (destroyed), no sync needed

@@ -1,0 +1,9 @@
+falcon
+httpx
+backoff
+uvicorn
+psutil
+
+black
+isort
+flake8
