@@ -82,6 +82,13 @@ if ! systemctl is-active --quiet docker; then
     systemctl start docker
 fi
 
+# Remove invalid Docker authz plugin if present
+if grep -q "qudata-authz" /etc/docker/daemon.json 2>/dev/null; then
+    echo -e "${YELLOW}Removing invalid Docker plugin configuration (qudata-authz)...${NC}"
+    jq 'del(.authorization-plugins)' /etc/docker/daemon.json > /tmp/daemon-clean.json && mv /tmp/daemon-clean.json /etc/docker/daemon.json
+    systemctl restart docker || true
+fi
+
 echo -e "${YELLOW}[5/11] Checking for NVIDIA GPU...${NC}"
 if lspci | grep -i nvidia > /dev/null 2>&1; then
     echo "  NVIDIA GPU detected: $(lspci | grep -i nvidia | head -n1 | cut -d: -f3)"
