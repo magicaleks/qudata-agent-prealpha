@@ -40,6 +40,7 @@ REPO_URL="https://github.com/magicaleks/qudata-agent-v2.git"
 INSTALL_DIR="/opt/qudata-agent"
 
 echo -e "${BLUE}API Key: ${API_KEY:0:8}...${NC}"
+export QUDATA_API_KEY=${API_KEY}
 echo -e "${BLUE}Install Directory: $INSTALL_DIR${NC}"
 echo ""
 

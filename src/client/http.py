@@ -1,3 +1,4 @@
+import os
 import sys
 from typing import Any, Dict, Optional
 
@@ -17,7 +18,7 @@ class HttpClient:
             follow_redirects=True
         )
         secret = get_agent_secret()
-        api_key = sys.argv[1] if len(sys.argv) > 1 else ""
+        api_key = os.getenv("QUDATA_API_KEY")
         self._client.headers.update({"X-Api-Key": api_key})
         if secret:
             self._client.headers.update({consts.APP_HEADER_NAME: secret})
