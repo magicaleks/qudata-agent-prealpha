@@ -101,25 +101,79 @@ if lspci | grep -i nvidia > /dev/null 2>&1; then
 
     echo -e "${YELLOW}[6/11] Installing NVIDIA Container Toolkit...${NC}"
     if ! dpkg -l | grep -q nvidia-container-toolkit 2>/dev/null; then
-        echo "  Setting up NVIDIA Container Toolkit repository..."
+        echo "  Setting up NVIDIA Container Toolkit..."
+        
+        # Настройка репозитория вручную (обход проблем с недоступностью NVIDIA серверов)
+        distribution=$(. /etc/os-release; echo $ID$VERSION_ID | sed 's/\.//g')
         
         # Добавляем GPG ключ
-        curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg 2>/dev/null
+        curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey 2>/dev/null | \
+            gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg 2>/dev/null || \
+            echo "Warning: Could not fetch GPG key"
         
-        # Используем универсальный репозиторий для всех DEB-based дистрибутивов (Ubuntu, Debian)
-        curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-            sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-            tee /etc/apt/sources.list.d/nvidia-container-toolkit.list > /dev/null
+        # Создаём файл репозитория вручную
+        cat > /etc/apt/sources.list.d/nvidia-container-toolkit.list <<'EOF'
+deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://nvidia.github.io/libnvidia-container/stable/deb/amd64 /
+EOF
         
-        # Устанавливаем toolkit
-        apt-get update -qq
-        apt-get install -y nvidia-container-toolkit 2>&1 | grep -v "^Reading" || true
+        # Обновляем и пытаемся установить
+        echo "  Updating package lists..."
+        apt-get update -qq 2>&1 | grep -v "^Reading\|^Building\|^Fetched" || true
         
-        # Настраиваем Docker runtime
-        nvidia-ctk runtime configure --runtime=docker
-        systemctl restart docker
-        
-        echo -e "${GREEN}✓ NVIDIA Container Toolkit installed${NC}"
+        echo "  Installing nvidia-container-toolkit..."
+        if apt-get install -y nvidia-container-toolkit 2>&1 | tee /tmp/nvidia-install.log | grep -E "Setting up|already"; then
+            # Настройка Docker runtime
+            if command -v nvidia-ctk &> /dev/null; then
+                nvidia-ctk runtime configure --runtime=docker > /dev/null 2>&1 || true
+                systemctl restart docker 2>/dev/null || true
+            fi
+            echo -e "${GREEN}✓ NVIDIA Container Toolkit installed${NC}"
+        else
+            echo -e "${YELLOW}⚠ Installation from repository failed${NC}"
+            echo "  Last error:"
+            tail -n 3 /tmp/nvidia-install.log 2>/dev/null || true
+            
+            # Пробуем альтернативный пакет nvidia-docker2
+            echo "  Trying nvidia-docker2 as alternative..."
+            if apt-get install -y nvidia-docker2 2>/dev/null; then
+                systemctl restart docker 2>/dev/null || true
+                echo -e "${GREEN}✓ NVIDIA Docker2 installed${NC}"
+            else
+                # Метод 3: Скачивание и установка пакетов напрямую (если репозитории недоступны)
+                echo "  Trying direct package download from GitHub..."
+                TMPDIR=$(mktemp -d)
+                cd "$TMPDIR"
+                
+                # Скачиваем основные пакеты напрямую из GitHub
+                BASE_URL="https://github.com/NVIDIA/libnvidia-container/releases/download"
+                VERSION="1.14.5-1"  # Стабильная версия
+                
+                wget -q "${BASE_URL}/v${VERSION}/libnvidia-container1_${VERSION}_amd64.deb" 2>/dev/null || true
+                wget -q "${BASE_URL}/v${VERSION}/libnvidia-container-tools_${VERSION}_amd64.deb" 2>/dev/null || true
+                wget -q "${BASE_URL}/v${VERSION}/nvidia-container-toolkit_${VERSION}_amd64.deb" 2>/dev/null || true
+                
+                if ls *.deb 1> /dev/null 2>&1; then
+                    echo "  Installing downloaded packages..."
+                    dpkg -i *.deb 2>/dev/null || apt-get install -f -y 2>/dev/null
+                    
+                    if command -v nvidia-ctk &> /dev/null; then
+                        nvidia-ctk runtime configure --runtime=docker > /dev/null 2>&1 || true
+                        systemctl restart docker 2>/dev/null || true
+                        echo -e "${GREEN}✓ NVIDIA Container Toolkit installed from GitHub${NC}"
+                    else
+                        echo -e "${YELLOW}⚠ Installation incomplete${NC}"
+                    fi
+                else
+                    echo -e "${YELLOW}⚠ Could not install NVIDIA container support${NC}"
+                    echo -e "${YELLOW}⚠ GPU support in Docker may not work${NC}"
+                    echo -e "${BLUE}ℹ Manual installation: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html${NC}"
+                fi
+                
+                cd - > /dev/null
+                rm -rf "$TMPDIR"
+            fi
+        fi
+        rm -f /tmp/nvidia-install.log
     else
         echo -e "${GREEN}✓ NVIDIA Container Toolkit already installed${NC}"
     fi
