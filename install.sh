@@ -204,17 +204,27 @@ if [ ! -f "requirements.txt" ]; then
 fi
 
 echo "  Upgrading pip..."
-pip3 install --upgrade pip > /dev/null 2>&1 || echo "  (pip upgrade skipped)"
+pip3 install --upgrade pip --break-system-packages > /dev/null 2>&1 || echo "  (pip upgrade skipped)"
 
 echo "  Installing packages from requirements.txt..."
 echo "  This may take 2-5 minutes depending on your connection..."
 echo ""
 
+# Определяем нужен ли флаг --break-system-packages (для Python 3.12+ и Debian/Ubuntu 24.04+)
+PIP_FLAGS=""
+if python3 -c "import sys; exit(0 if sys.version_info >= (3, 11) else 1)" 2>/dev/null; then
+    # Проверяем, нужен ли флаг
+    if pip3 install --help 2>&1 | grep -q "break-system-packages"; then
+        PIP_FLAGS="--break-system-packages"
+        echo "  Note: Using --break-system-packages flag for Python 3.11+ (this is safe for system services)"
+    fi
+fi
+
 # Временно отключаем set -e для этой команды
 set +e
 
 # Устанавливаем пакеты с выводом в лог
-pip3 install -r requirements.txt > /tmp/pip-install.log 2>&1
+pip3 install $PIP_FLAGS -r requirements.txt > /tmp/pip-install.log 2>&1
 PIP_EXIT_CODE=$?
 
 # Показываем важные строки из лога
@@ -226,12 +236,14 @@ echo ""
 if [ $PIP_EXIT_CODE -eq 0 ]; then
     echo -e "${GREEN}✓ Python dependencies installed${NC}"
 else
-    echo -e "${YELLOW}⚠ Warning: pip installation had issues (exit code: $PIP_EXIT_CODE)${NC}"
+    echo -e "${RED}✗ Error: pip installation failed (exit code: $PIP_EXIT_CODE)${NC}"
     echo ""
     echo "  Full installation log:"
-    cat /tmp/pip-install.log | tail -n 15 | sed 's/^/    /'
+    cat /tmp/pip-install.log | tail -n 20 | sed 's/^/    /'
     echo ""
-    echo -e "${YELLOW}  This may be normal. Continuing...${NC}"
+    echo -e "${RED}Installation cannot continue without Python dependencies${NC}"
+    rm -f /tmp/pip-install.log
+    exit 1
 fi
 rm -f /tmp/pip-install.log
 
@@ -254,7 +266,8 @@ Type=simple
 User=root
 WorkingDirectory=$INSTALL_DIR
 Environment="PYTHONUNBUFFERED=1"
-ExecStart=/usr/bin/python3 $INSTALL_DIR/main.py $API_KEY
+Environment="QUDATA_API_KEY=$API_KEY"
+ExecStart=/usr/bin/python3 $INSTALL_DIR/main.py
 Restart=always
 RestartSec=10
 StandardOutput=journal

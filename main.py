@@ -275,7 +275,35 @@ def main():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    # Проверяем API ключ из аргументов, env или secret_key.json
+    import os
+    from src.storage.secure import get_agent_secret
+    
+    api_key = None
+    
+    # Приоритет 1: аргумент командной строки
+    if len(sys.argv) >= 2:
+        api_key = sys.argv[1]
+    
+    # Приоритет 2: переменная окружения
+    if not api_key:
+        api_key = os.environ.get("QUDATA_API_KEY")
+    
+    # Приоритет 3: файл secret_key.json
+    if not api_key:
+        api_key = get_agent_secret()
+    
+    if not api_key:
+        logger.error("API key not provided via QUDATA_API_KEY env var or command line. Exiting.")
         print("Usage: python main.py <API_KEY>")
+        print("Or set QUDATA_API_KEY environment variable")
+        print("Or place API key in secret_key.json file")
         sys.exit(1)
+    
+    # Устанавливаем API ключ как первый аргумент для совместимости с HttpClient
+    if len(sys.argv) < 2:
+        sys.argv.append(api_key)
+    else:
+        sys.argv[1] = api_key
+    
     main()
