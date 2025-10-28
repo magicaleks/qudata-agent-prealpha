@@ -19,7 +19,7 @@ wget https://raw.githubusercontent.com/magicaleks/qudata-agent-prealpha/main/ins
 # Запустить установку
 sudo bash install.sh YOUR_API_KEY
 ```
-
+а
 ## 📋 Что устанавливает скрипт
 
 1. **Системные зависимости**: git, curl, wget, ethtool, dmidecode и др.
