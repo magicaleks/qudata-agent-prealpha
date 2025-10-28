@@ -163,52 +163,71 @@ def stats_heartbeat_thread():
 
 
 def initialize_agent() -> bool:
-    max_retries = 3
-    retry_delay = 5
-
+    """Упрощённая инициализация агента без ретраев"""
+    print("=" * 60)
+    print("STARTING AGENT INITIALIZATION")
+    print("=" * 60)
     logger.info("=== Starting agent initialization ===")
     
-    for attempt in range(1, max_retries + 1):
-        try:
-            logger.info(f"Initializing agent (attempt {attempt}/{max_retries})")
-            logger.info(f"  Agent ID: {agent_id()}")
-            logger.info(f"  Agent Port: {agent_port()}")
-            logger.info(f"  Agent Address: {runtime.agent_address()}")
-            
-            client = QudataClient()
-            logger.info("  QudataClient created")
+    try:
+        # Собираем данные для инициализации
+        print(f"Agent ID: {agent_id()}")
+        print(f"Agent Port: {agent_port()}")
+        print(f"Agent Address: {runtime.agent_address()}")
+        
+        logger.info(f"Agent ID: {agent_id()}")
+        logger.info(f"Agent Port: {agent_port()}")
+        logger.info(f"Agent Address: {runtime.agent_address()}")
+        
+        # Создаём клиент
+        print("Creating QudataClient...")
+        client = QudataClient()
+        logger.info("QudataClient created")
 
-            init_data = InitAgent(
-                agent_id=agent_id(),
-                agent_port=agent_port(),
-                address=runtime.agent_address(),
-                fingerprint=get_fingerprint(),
-                pid=runtime.agent_pid(),
-            )
-            logger.info("  Sending init request to API...")
+        # Подготавливаем данные инициализации
+        print("Preparing init data...")
+        init_data = InitAgent(
+            agent_id=agent_id(),
+            agent_port=agent_port(),
+            address=runtime.agent_address(),
+            fingerprint=get_fingerprint(),
+            pid=runtime.agent_pid(),
+        )
+        
+        # Отправляем запрос инициализации
+        print("Sending init request to API server...")
+        logger.info("Sending init request to API server...")
+        agent_response = client.init(init_data)
+        
+        print(f"✓ Agent initialized! Created: {agent_response.agent_created}")
+        logger.info(f"✓ Agent initialized! Created: {agent_response.agent_created}")
 
-            agent_response = client.init(init_data)
-            logger.info(f"  Agent initialized: {agent_response.agent_created}")
+        # Собираем информацию о хосте
+        print("Collecting host hardware info...")
+        logger.info("Collecting host info...")
+        host_info = collect_host_info()
+        
+        # Регистрируем хост
+        print("Registering host with API server...")
+        logger.info("Registering host with API server...")
+        client.create_host(host_info)
+        
+        print("✓ HOST REGISTERED SUCCESSFULLY!")
+        print("=" * 60)
+        logger.info("✓ Host registered successfully")
+        return True
 
-            logger.info("  Collecting host info...")
-            host_info = collect_host_info()
-            
-            logger.info("  Registering host with API...")
-            client.create_host(host_info)
-            logger.info("✓ Host registered successfully")
-
-            return True
-
-        except Exception as e:
-            logger.error(f"✗ Initialization attempt {attempt} failed: {e}", exc=e)
-            if attempt < max_retries:
-                logger.info(f"  Retrying in {retry_delay} seconds...")
-                time.sleep(retry_delay)
-            else:
-                logger.error("✗ All initialization attempts failed")
-                return False
-
-    return False
+    except Exception as e:
+        print(f"✗ INITIALIZATION FAILED: {e}")
+        print(f"Error type: {type(e).__name__}")
+        print("=" * 60)
+        logger.error(f"✗ Initialization failed: {e}", exc=e)
+        
+        # Показываем больше деталей об ошибке
+        import traceback
+        traceback.print_exc()
+        
+        return False
 
 
 def main():
@@ -217,66 +236,70 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
+    print("\n" + "=" * 70)
+    print("QUDATA AGENT STARTING")
+    print("=" * 70)
+    
     try:
         logger.info("=== QuData Agent Starting ===")
-        logger.info(f"Python version: {sys.version}")
-        logger.info(f"Working directory: {os.getcwd()}")
+        logger.info(f"Python: {sys.version}")
+        logger.info(f"Working dir: {os.getcwd()}")
+        
+        print(f"Python: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+        print(f"Working directory: {os.getcwd()}")
+        print()
 
+        # Системные проверки
+        print("Step 1/5: System checks...")
         print_system_status()
 
-        logger.info("Checking system requirements...")
         all_ok, missing = check_all_requirements()
         if not all_ok:
-            logger.error(f"Missing required components: {', '.join(missing)}")
-            logger.info("Attempting to install missing packages...")
+            print(f"✗ Missing: {', '.join(missing)}")
+            logger.error(f"Missing components: {', '.join(missing)}")
+            print("Attempting to install...")
             if not install_missing_packages():
-                logger.error(
-                    "Failed to install required packages. Please install them manually."
-                )
+                print("✗ Failed to install packages")
                 sys.exit(1)
-        else:
-            logger.info("✓ All system requirements met")
+        print("✓ System requirements OK\n")
         
-        # Проверяем Docker и синхронизируем состояние
-        logger.info("Checking Docker status...")
-        if check_docker_running():
-            logger.info("✓ Docker is running, syncing state...")
-            sync_state_with_docker()
-        else:
-            logger.error("✗ Docker is not running, cannot start agent")
+        # Docker проверка
+        print("Step 2/5: Docker check...")
+        if not check_docker_running():
+            print("✗ Docker is not running!")
+            logger.error("Docker is not running")
             sys.exit(1)
+        print("✓ Docker is running")
+        sync_state_with_docker()
+        print()
 
-        logger.info("Starting agent initialization...")
+        # Инициализация агента
+        print("Step 3/5: Agent initialization...")
         if not initialize_agent():
-            logger.error("✗ Failed to initialize agent, exiting")
+            print("✗ AGENT INITIALIZATION FAILED")
+            logger.error("Agent initialization failed")
             sys.exit(1)
-        logger.info("✓ Agent initialization complete")
+        print()
 
-        logger.info("Starting background threads...")
+        # Запуск фоновых задач
+        print("Step 4/5: Starting background tasks...")
         stats_thread = Thread(target=stats_heartbeat_thread, daemon=True)
         stats_thread.start()
-        logger.info("✓ Stats heartbeat thread started")
+        print("✓ Stats heartbeat thread started\n")
+        logger.info("Stats heartbeat thread started")
 
+        # Запуск веб-сервера
+        print("Step 5/5: Starting HTTP server...")
         port = agent_port()
-        # gunicorn_command = [
-        #     sys.executable,
-        #     "-m",
-        #     "gunicorn",
-        #     "-w",
-        #     "2",
-        #     "-b",
-        #     f"0.0.0.0:{port}",
-        #     "--timeout",
-        #     "120",
-        #     "--graceful-timeout",
-        #     "30",
-        #     "--chdir",
-        #     ".",
-        #     "src.server.server:app",
-        # ]
-
+        print(f"✓ Server will listen on 0.0.0.0:{port}")
+        print("=" * 70)
+        print("AGENT IS FULLY OPERATIONAL")
+        print("=" * 70)
+        print()
+        
         logger.info(f"Starting HTTP server on 0.0.0.0:{port}")
         logger.info("=== Agent is fully operational ===")
+        
         run("src.server.server:app", host="0.0.0.0", port=port, log_level="warning")
 
     except KeyboardInterrupt:

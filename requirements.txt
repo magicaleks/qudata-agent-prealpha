@@ -1,6 +1,5 @@
 falcon
 httpx
-backoff
 uvicorn
 psutil
 
