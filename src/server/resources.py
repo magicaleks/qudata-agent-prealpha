@@ -167,6 +167,7 @@ class ManageInstancesResource:
     async def on_post(self, req: Request, resp: Response) -> None:
         logger.info(f"POST /instances request from {req.remote_addr}")
 
+        # Валидация запроса
         try:
             json_data = req.context.get("json")
             logger.info(f"Received JSON data: {json_data}")
@@ -183,21 +184,44 @@ class ManageInstancesResource:
                 title="Invalid JSON payload", description=str(e)
             )
 
-        try:
-            success, data, error = instances.create_new_instance(create_params)
-
-            if success:
-                logger.info(f"Instance created successfully: {data.get('ports', {})}")
-                resp.status = falcon.HTTP_201
-                resp.context["result"] = {"ok": True, "data": data}
-            else:
-                logger.error(f"Failed to create instance: {error}")
-                resp.status = falcon.HTTP_500
-                resp.context["result"] = {"ok": False, "error": error}
-        except Exception as e:
-            logger.error(f"Unexpected error during instance creation: {e}", exc=e)
-            resp.status = falcon.HTTP_500
-            resp.context["result"] = {"ok": False, "error": str(e)}
+        # Асинхронное создание контейнера в фоновом потоке
+        def create_instance_async():
+            try:
+                logger.info("Starting background instance creation...")
+                success, data, error = instances.create_new_instance(create_params)
+                
+                if success:
+                    logger.info(f"✓ Instance created successfully in background: {data.get('ports', {})}")
+                    # Отправляем статистику после успешного создания
+                    send_stats_async()
+                else:
+                    logger.error(f"✗ Background instance creation failed: {error}")
+                    # Обновляем состояние на error
+                    current_state = state_manager.get_current_state()
+                    current_state.status = "error"
+                    current_state.container_id = None
+                    state_manager.save_state(current_state)
+            except Exception as e:
+                logger.error(f"✗ Unexpected error in background instance creation: {e}", exc=e)
+                # Обновляем состояние на error
+                current_state = state_manager.get_current_state()
+                current_state.status = "error"
+                current_state.container_id = None
+                state_manager.save_state(current_state)
+        
+        # Запускаем создание в фоне
+        Thread(target=create_instance_async, daemon=True).start()
+        
+        # Сразу возвращаем успех (202 Accepted)
+        logger.info("✓ Instance creation request accepted, processing in background")
+        resp.status = falcon.HTTP_202  # 202 Accepted - запрос принят, обрабатывается
+        resp.context["result"] = {
+            "ok": True, 
+            "data": {
+                "message": "Instance creation started",
+                "status": "creating"
+            }
+        }
 
     async def on_put(self, req: Request, resp: Response) -> None:
         logger.info(f"PUT /instances request from {req.remote_addr}")
