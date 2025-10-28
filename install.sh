@@ -108,16 +108,16 @@ if lspci | grep -i nvidia > /dev/null 2>&1; then
     
     echo -e "${YELLOW}[6/11] Installing NVIDIA Container Toolkit...${NC}"
     if ! dpkg -l | grep -q nvidia-container-toolkit 2>/dev/null; then
-        echo "  Setting up NVIDIA Container Toolkit repository..."
-        distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-        curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-        curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
+          echo "  Setting up NVIDIA Container Toolkit repository..."
+          curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+          curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
             sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
             tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-        apt-get update -qq
-        apt-get install -y nvidia-container-toolkit 2>&1 | grep -v "^Reading" || true
-        nvidia-ctk runtime configure --runtime=docker
-        systemctl restart docker
+
+          apt-get update -qq
+          apt-get install -y nvidia-container-toolkit
+          nvidia-ctk runtime configure --runtime=docker
+          systemctl restart docker
         echo -e "${GREEN}✓ NVIDIA Container Toolkit installed${NC}"
     else
         echo -e "${GREEN}✓ NVIDIA Container Toolkit already installed${NC}"
