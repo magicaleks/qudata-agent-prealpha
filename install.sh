@@ -186,8 +186,8 @@ EOF
     else
         echo -e "${GREEN}✓ NVIDIA Container Toolkit already installed${NC}"
     fi
-#else
-#    echo -e "${YELLOW}⚠ No NVIDIA GPU detected, skipping GPU setup${NC}"
+else
+    echo -e ""
 fi
 
 echo -e "${YELLOW}[7/11] Cloning QuData Agent repository...${NC}"
