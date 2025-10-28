@@ -186,7 +186,7 @@ EOF
     else
         echo -e "${GREEN}✓ NVIDIA Container Toolkit already installed${NC}"
     fi
-else
+#else
 #    echo -e "${YELLOW}⚠ No NVIDIA GPU detected, skipping GPU setup${NC}"
 fi
 
