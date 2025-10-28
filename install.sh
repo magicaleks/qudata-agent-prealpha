@@ -196,9 +196,44 @@ echo -e "${GREEN}✓ Repository ready at $INSTALL_DIR${NC}"
 
 echo -e "${YELLOW}[8/11] Installing Python dependencies...${NC}"
 cd "$INSTALL_DIR"
-pip3 install --upgrade pip > /dev/null 2>&1
-pip3 install -r requirements.txt 2>&1 | grep -E "Successfully|Requirement already satisfied" || true
-echo -e "${GREEN}✓ Python dependencies installed${NC}"
+
+# Проверяем наличие requirements.txt
+if [ ! -f "requirements.txt" ]; then
+    echo -e "${RED}Error: requirements.txt not found in $INSTALL_DIR${NC}"
+    exit 1
+fi
+
+echo "  Upgrading pip..."
+pip3 install --upgrade pip > /dev/null 2>&1 || echo "  (pip upgrade skipped)"
+
+echo "  Installing packages from requirements.txt..."
+echo "  This may take 2-5 minutes depending on your connection..."
+echo ""
+
+# Временно отключаем set -e для этой команды
+set +e
+
+# Устанавливаем пакеты с выводом в лог
+pip3 install -r requirements.txt > /tmp/pip-install.log 2>&1
+PIP_EXIT_CODE=$?
+
+# Показываем важные строки из лога
+cat /tmp/pip-install.log | grep -E "Collecting|Successfully installed|Requirement already|ERROR|error" | sed 's/^/    /' || true
+
+set -e
+
+echo ""
+if [ $PIP_EXIT_CODE -eq 0 ]; then
+    echo -e "${GREEN}✓ Python dependencies installed${NC}"
+else
+    echo -e "${YELLOW}⚠ Warning: pip installation had issues (exit code: $PIP_EXIT_CODE)${NC}"
+    echo ""
+    echo "  Full installation log:"
+    cat /tmp/pip-install.log | tail -n 15 | sed 's/^/    /'
+    echo ""
+    echo -e "${YELLOW}  This may be normal. Continuing...${NC}"
+fi
+rm -f /tmp/pip-install.log
 
 echo -e "${YELLOW}[9/11] Saving API key...${NC}"
 mkdir -p "$INSTALL_DIR"
