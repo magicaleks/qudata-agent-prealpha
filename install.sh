@@ -90,40 +90,40 @@ if grep -q "qudata-authz" /etc/docker/daemon.json 2>/dev/null; then
 fi
 
 echo -e "${YELLOW}[5/11] Checking for NVIDIA GPU...${NC}"
-if lspci | grep -i nvidia > /dev/null 2>&1; then
-    echo "  NVIDIA GPU detected: $(lspci | grep -i nvidia | head -n1 | cut -d: -f3)"
-    
-    if ! command -v nvidia-smi &> /dev/null; then
-        echo "  Installing NVIDIA drivers..."
-        apt-get install -y linux-headers-$(uname -r) 2>&1 | grep -v "^Reading" || true
-        apt-get install -y nvidia-driver-535 2>&1 | grep -v "^Reading" || true
-        echo -e "${YELLOW}⚠ NVIDIA driver installed. System reboot required!${NC}"
-        echo -e "${YELLOW}⚠ After reboot, run this script again with the same API key.${NC}"
-        echo ""
-        echo -e "${BLUE}Reboot command: sudo reboot${NC}"
-        exit 0
-    else
-        echo -e "${GREEN}✓ NVIDIA drivers installed ($(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -n1))${NC}"
-    fi
-    
-    echo -e "${YELLOW}[6/11] Installing NVIDIA Container Toolkit...${NC}"
-    if ! dpkg -l | grep -q nvidia-container-toolkit 2>/dev/null; then
-          echo "  Setting up NVIDIA Container Toolkit repository..."
-          curl -fsSL https://github.com/NVIDIA/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-          curl -s -L https://github.com/NVIDIA/libnvidia-container/tree/gh-pages/stable/deb/nvidia-container-toolkit.list | \
-            sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-            tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+echo -e "${YELLOW}[4/9] Checking for GPU...${NC}"
+# Ищем любое устройство класса VGA (0300) или 3D Controller (0302)
+GPU_INFO=$(lspci -nn | grep -E "Class 0300|Class 0302" | head -n1)
 
-          apt-get update -qq
-          apt-get install -y nvidia-container-toolkit
-          nvidia-ctk runtime configure --runtime=docker
-          systemctl restart docker
-        echo -e "${GREEN}✓ NVIDIA Container Toolkit installed${NC}"
+if [ -n "$GPU_INFO" ]; then
+    # Извлекаем производителя из вывода lspci
+    GPU_VENDOR=$(echo "$GPU_INFO" | grep -oP '\[\K[^\]]+' | head -n1)
+    echo "  GPU detected: $GPU_VENDOR"
+
+    # --- Логика только для NVIDIA ---
+    if echo "$GPU_VENDOR" | grep -iq "NVIDIA"; then
+        echo "  NVIDIA GPU found. Setting up NVIDIA Container Toolkit..."
+        if ! command -v nvidia-smi &> /dev/null; then
+            echo "  ${YELLOW}Warning: NVIDIA drivers not found. Please install them manually for GPU support.${NC}"
+        fi
+
+        if ! dpkg -l | grep -q nvidia-container-toolkit 2>/dev/null; then
+            echo "  Setting up NVIDIA Container Toolkit repository using official script..."
+            curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+            && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+                sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+                sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list > /dev/null
+            apt-get update -qq
+            apt-get install -y nvidia-container-toolkit 2>&1 | grep -v "^Reading" || true
+            nvidia-ctk runtime configure --runtime=docker
+            systemctl restart docker
+        fi
+        echo -e "${GREEN}✓ NVIDIA support configured${NC}"
     else
-        echo -e "${GREEN}✓ NVIDIA Container Toolkit already installed${NC}"
+        echo "  Non-NVIDIA GPU detected ($GPU_VENDOR). Skipping specific toolkit installation."
+        echo "  GPU passthrough will rely on standard VFIO."
     fi
 else
-    echo -e "${YELLOW}⚠ No NVIDIA GPU detected, skipping GPU setup${NC}"
+    echo -e "${YELLOW}⚠️ No GPU detected, skipping GPU setup${NC}"
 fi
 
 echo -e "${YELLOW}[7/11] Cloning QuData Agent repository...${NC}"
