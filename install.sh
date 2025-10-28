@@ -65,6 +65,14 @@ if [ "$(printf '%s\n' "3.10" "$PYTHON_VERSION" | sort -V | head -n1)" != "3.10" 
     apt-get install -y python3.10 python3.10-venv python3.10-dev python3-pip 2>&1 | grep -v "^Reading\|^Building" || true
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 fi
+
+if ! command -v pip3 &> /dev/null; then
+    echo "  pip3 not found, installing python3-pip..."
+    apt-get install -y python3-pip 2>&1 | grep -v "^Reading\|^Building" || true
+    # Также установим venv, он понадобится для break-system-packages
+    apt-get install -y python3-venv 2>&1 | grep -v "^Reading\|^Building" || true
+fi
+
 echo -e "${GREEN}✓ Python version: $(python3 --version)${NC}"
 
 echo -e "${YELLOW}[4/11] Checking for Docker...${NC}"

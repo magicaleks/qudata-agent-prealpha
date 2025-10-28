@@ -3,6 +3,7 @@ import signal
 import subprocess
 import sys
 import time
+import json
 from threading import Event, Thread
 from typing import Optional
 
@@ -164,69 +165,79 @@ def stats_heartbeat_thread():
 
 def initialize_agent() -> bool:
     """Упрощённая инициализация агента без ретраев"""
-    print("=" * 60)
-    print("STARTING AGENT INITIALIZATION")
-    print("=" * 60)
-    logger.info("=== Starting agent initialization ===")
-    
-    try:
-        # Собираем данные для инициализации
-        print(f"Agent ID: {agent_id()}")
-        print(f"Agent Port: {agent_port()}")
-        print(f"Agent Address: {runtime.agent_address()}")
-        
-        logger.info(f"Agent ID: {agent_id()}")
-        logger.info(f"Agent Port: {agent_port()}")
-        logger.info(f"Agent Address: {runtime.agent_address()}")
-        
-        # Создаём клиент
-        print("Creating QudataClient...")
-        client = QudataClient()
-        logger.info("QudataClient created")
+    logger.info("=" * 60)
+    logger.info("STARTING AGENT INITIALIZATION")
+    logger.info("=" * 60)
 
-        # Подготавливаем данные инициализации
-        print("Preparing init data...")
+    try:
+        # === ШАГ 1: Собираем данные ===
+        agent_id_val = agent_id()
+        agent_port_val = agent_port()
+        agent_address_val = runtime.agent_address()
+        fingerprint_val = get_fingerprint()
+        pid_val = runtime.agent_pid()
+
+        # === ШАГ 2: Логируем каждое значение через logger ===
+        logger.info(f"--- Init Data Collection ---")
+        logger.info(f"  agent_id: {agent_id_val} (type: {type(agent_id_val)})")
+        logger.info(
+            f"  agent_port: {agent_port_val} (type: {type(agent_port_val)})")
+        logger.info(
+            f"  address: {agent_address_val} (type: {type(agent_address_val)})")
+        logger.info(
+            f"  fingerprint: {fingerprint_val} (type: {type(fingerprint_val)})")
+        logger.info(f"  pid: {pid_val} (type: {type(pid_val)})")
+        logger.info(f"--------------------------")
+
         init_data = InitAgent(
-            agent_id=agent_id(),
-            agent_port=agent_port(),
-            address=runtime.agent_address(),
-            fingerprint=get_fingerprint(),
-            pid=runtime.agent_pid(),
+            agent_id=agent_id_val,
+            agent_port=agent_port_val,
+            address=agent_address_val,
+            fingerprint=fingerprint_val,
+            pid=pid_val,
         )
-        
-        # Отправляем запрос инициализации
-        print("Sending init request to API server...")
+
+        from src.utils.dto import to_json
+        logger.info(
+            f"Prepared JSON data for /init: {json.dumps(to_json(init_data), indent=2)}")
+
+        # === ШАГ 4: Отправляем запрос ===
+        logger.info("Creating QudataClient...")
+        client = QudataClient()
+
         logger.info("Sending init request to API server...")
         agent_response = client.init(init_data)
-        
-        print(f"✓ Agent initialized! Created: {agent_response.agent_created}")
-        logger.info(f"✓ Agent initialized! Created: {agent_response.agent_created}")
 
-        # Собираем информацию о хосте
-        print("Collecting host hardware info...")
-        logger.info("Collecting host info...")
+        logger.info(
+            f"✓ Agent initialized! Created: {agent_response.agent_created}")
+
+        # === ШАГ 5: Собираем информацию о хосте и регистрируем его ===
+        logger.info("Collecting host hardware info...")
         host_info = collect_host_info()
-        
-        # Регистрируем хост
-        print("Registering host with API server...")
+
         logger.info("Registering host with API server...")
         client.create_host(host_info)
-        
-        print("✓ HOST REGISTERED SUCCESSFULLY!")
-        print("=" * 60)
-        logger.info("✓ Host registered successfully")
+
+        logger.info("✓ HOST REGISTERED SUCCESSFULLY!")
+        logger.info("=" * 60)
         return True
 
     except Exception as e:
-        print(f"✗ INITIALIZATION FAILED: {e}")
-        print(f"Error type: {type(e).__name__}")
-        print("=" * 60)
-        logger.error(f"✗ Initialization failed: {e}", exc=e)
-        
-        # Показываем больше деталей об ошибке
-        import traceback
-        traceback.print_exc()
-        
+        logger.error(f"✗ INITIALIZATION FAILED: {e}")
+
+        if hasattr(e, 'response') and e.response is not None:
+            logger.error("-" * 20 + " SERVER RESPONSE " + "-" * 20)
+            logger.error(f"Status Code: {e.response.status_code}")
+            try:
+                response_json = e.response.json()
+                logger.error("Response JSON Body:")
+                logger.error(json.dumps(response_json, indent=2))
+            except Exception:
+                logger.error("Response Text Body (not JSON):")
+                logger.error(e.response.text)
+            logger.error("-" * 57)
+
+        logger.error("Full traceback:", exc_info=True)
         return False
 
 
