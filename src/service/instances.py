@@ -1,3 +1,4 @@
+import time
 import uuid
 from dataclasses import asdict
 from threading import Thread
@@ -147,7 +148,29 @@ def create_new_instance(
             return False, None, f"Failed to run Docker container: {stderr}"
 
         container_id = container_id.strip()
-        logger.info(f"Container '{container_id[:12]}' started successfully.")
+        logger.info(f"Container '{container_id[:12]}' created, checking status...")
+        
+        # Проверяем статус контейнера через пару секунд
+        time.sleep(2)
+        
+        success, status, _ = run_command(
+            ["docker", "inspect", "-f", "{{.State.Status}}", container_id]
+        )
+        
+        if not success or status.strip() != "running":
+            # Контейнер не запустился или упал
+            logger.error(f"Container {container_id[:12]} is not running (status: {status.strip()})")
+            
+            # Получаем логи контейнера для диагностики
+            _, logs, _ = run_command(["docker", "logs", container_id])
+            logger.error(f"Container logs: {logs[:500]}")
+            
+            # Удаляем упавший контейнер
+            run_command(["docker", "rm", "-f", container_id])
+            
+            return False, None, f"Container failed to start (status: {status.strip()}). Logs: {logs[:200]}"
+        
+        logger.info(f"✓ Container '{container_id[:12]}' is running")
 
         # Если SSH включен, настраиваем SSH в контейнере в фоновом режиме
         if params.ssh_enabled:
