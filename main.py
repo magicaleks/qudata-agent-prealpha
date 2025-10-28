@@ -1,3 +1,4 @@
+import os
 import signal
 import subprocess
 import sys
@@ -165,10 +166,17 @@ def initialize_agent() -> bool:
     max_retries = 3
     retry_delay = 5
 
+    logger.info("=== Starting agent initialization ===")
+    
     for attempt in range(1, max_retries + 1):
         try:
             logger.info(f"Initializing agent (attempt {attempt}/{max_retries})")
+            logger.info(f"  Agent ID: {agent_id()}")
+            logger.info(f"  Agent Port: {agent_port()}")
+            logger.info(f"  Agent Address: {runtime.agent_address()}")
+            
             client = QudataClient()
+            logger.info("  QudataClient created")
 
             init_data = InitAgent(
                 agent_id=agent_id(),
@@ -177,23 +185,27 @@ def initialize_agent() -> bool:
                 fingerprint=get_fingerprint(),
                 pid=runtime.agent_pid(),
             )
+            logger.info("  Sending init request to API...")
 
             agent_response = client.init(init_data)
-            logger.info(f"Agent initialized: {agent_response.agent_created}")
+            logger.info(f"  Agent initialized: {agent_response.agent_created}")
 
+            logger.info("  Collecting host info...")
             host_info = collect_host_info()
+            
+            logger.info("  Registering host with API...")
             client.create_host(host_info)
-            logger.info("Host registered successfully")
+            logger.info("✓ Host registered successfully")
 
             return True
 
         except Exception as e:
-            logger.error(f"Initialization attempt {attempt} failed: {e}", exc=e)
+            logger.error(f"✗ Initialization attempt {attempt} failed: {e}", exc=e)
             if attempt < max_retries:
-                logger.info(f"Retrying in {retry_delay} seconds...")
+                logger.info(f"  Retrying in {retry_delay} seconds...")
                 time.sleep(retry_delay)
             else:
-                logger.error("All initialization attempts failed")
+                logger.error("✗ All initialization attempts failed")
                 return False
 
     return False
@@ -207,9 +219,12 @@ def main():
 
     try:
         logger.info("=== QuData Agent Starting ===")
+        logger.info(f"Python version: {sys.version}")
+        logger.info(f"Working directory: {os.getcwd()}")
 
         print_system_status()
 
+        logger.info("Checking system requirements...")
         all_ok, missing = check_all_requirements()
         if not all_ok:
             logger.error(f"Missing required components: {', '.join(missing)}")
@@ -219,22 +234,28 @@ def main():
                     "Failed to install required packages. Please install them manually."
                 )
                 sys.exit(1)
+        else:
+            logger.info("✓ All system requirements met")
         
         # Проверяем Docker и синхронизируем состояние
+        logger.info("Checking Docker status...")
         if check_docker_running():
-            logger.info("Docker is running, syncing state...")
+            logger.info("✓ Docker is running, syncing state...")
             sync_state_with_docker()
         else:
-            logger.error("Docker is not running, cannot start agent")
+            logger.error("✗ Docker is not running, cannot start agent")
             sys.exit(1)
 
+        logger.info("Starting agent initialization...")
         if not initialize_agent():
-            logger.error("Failed to initialize agent, exiting")
+            logger.error("✗ Failed to initialize agent, exiting")
             sys.exit(1)
+        logger.info("✓ Agent initialization complete")
 
+        logger.info("Starting background threads...")
         stats_thread = Thread(target=stats_heartbeat_thread, daemon=True)
         stats_thread.start()
-        logger.info("Stats heartbeat thread started")
+        logger.info("✓ Stats heartbeat thread started")
 
         port = agent_port()
         # gunicorn_command = [
@@ -254,8 +275,9 @@ def main():
         #     "src.server.server:app",
         # ]
 
-        logger.info(f"Starting server on port {port}")
-        run("src.server.server:app", host="0.0.0.0", port=port)
+        logger.info(f"Starting HTTP server on 0.0.0.0:{port}")
+        logger.info("=== Agent is fully operational ===")
+        run("src.server.server:app", host="0.0.0.0", port=port, log_level="warning")
 
     except KeyboardInterrupt:
         logger.info("Agent stopped by user")
@@ -275,10 +297,7 @@ def main():
 
 
 if __name__ == "__main__":
-    # Проверяем API ключ из аргументов, env или secret_key.json
-    import os
-    from src.storage.secure import get_agent_secret
-    
+    # Проверяем API ключ из аргументов или переменной окружения
     api_key = None
     
     # Приоритет 1: аргумент командной строки
@@ -289,15 +308,10 @@ if __name__ == "__main__":
     if not api_key:
         api_key = os.environ.get("QUDATA_API_KEY")
     
-    # Приоритет 3: файл secret_key.json
-    if not api_key:
-        api_key = get_agent_secret()
-    
     if not api_key:
         logger.error("API key not provided via QUDATA_API_KEY env var or command line. Exiting.")
         print("Usage: python main.py <API_KEY>")
         print("Or set QUDATA_API_KEY environment variable")
-        print("Or place API key in secret_key.json file")
         sys.exit(1)
     
     # Устанавливаем API ключ как первый аргумент для совместимости с HttpClient
@@ -306,4 +320,5 @@ if __name__ == "__main__":
     else:
         sys.argv[1] = api_key
     
+    logger.info(f"Starting with API key: {api_key[:8]}...")
     main()
