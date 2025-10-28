@@ -184,11 +184,42 @@ class ManageInstancesResource:
                 title="Invalid JSON payload", description=str(e)
             )
 
+        # Выделяем порты СРАЗУ, до фонового создания
+        from src.utils.ports import get_free_port
+        
+        allocated_ports = {}
+        try:
+            # Выделяем порты из запроса
+            for container_port, host_port_def in (create_params.ports or {}).items():
+                if str(host_port_def).lower() == "auto":
+                    host_port = str(get_free_port())
+                    logger.info(f"  Allocated auto port: {container_port} -> {host_port}")
+                else:
+                    host_port = str(host_port_def)
+                    logger.info(f"  Using specified port: {container_port} -> {host_port}")
+                allocated_ports[container_port] = host_port
+            
+            # Если SSH включен и порт 22 не указан, выделяем порт для SSH
+            if create_params.ssh_enabled and "22" not in (create_params.ports or {}):
+                ssh_port = str(get_free_port())
+                allocated_ports["22"] = ssh_port
+                logger.info(f"  Allocated SSH port: 22 -> {ssh_port}")
+            
+            logger.info(f"✓ Ports allocated: {allocated_ports}")
+            
+        except Exception as e:
+            logger.error(f"Failed to allocate ports: {e}", exc=e)
+            raise falcon.HTTPInternalServerError(
+                title="Port allocation failed",
+                description=str(e)
+            )
+
         # Асинхронное создание контейнера в фоновом потоке
         def create_instance_async():
             try:
                 logger.info("Starting background instance creation...")
-                success, data, error = instances.create_new_instance(create_params)
+                # Передаём предвыделенные порты в функцию создания
+                success, data, error = instances.create_new_instance(create_params, allocated_ports)
                 
                 if success:
                     logger.info(f"✓ Instance created successfully in background: {data.get('ports', {})}")
@@ -212,14 +243,15 @@ class ManageInstancesResource:
         # Запускаем создание в фоне
         Thread(target=create_instance_async, daemon=True).start()
         
-        # Сразу возвращаем успех (202 Accepted)
-        logger.info("✓ Instance creation request accepted, processing in background")
+        # Сразу возвращаем успех с выделенными портами (202 Accepted)
+        logger.info(f"✓ Instance creation request accepted, ports allocated: {allocated_ports}")
         resp.status = falcon.HTTP_202  # 202 Accepted - запрос принят, обрабатывается
         resp.context["result"] = {
             "ok": True, 
             "data": {
                 "message": "Instance creation started",
-                "status": "creating"
+                "status": "creating",
+                "ports": allocated_ports  # Возвращаем выделенные порты
             }
         }
 

@@ -34,6 +34,7 @@ def check_container_exists(container_id: str) -> bool:
 
 def create_new_instance(
     params: CreateInstance,
+    preallocated_ports: Optional[Dict[str, str]] = None,
 ) -> Tuple[bool, Optional[Dict[str, Any]], Optional[str]]:
     try:
         state = get_current_state()
@@ -87,23 +88,33 @@ def create_new_instance(
     if int(gpu_count) > 0:
         docker_command.append(f"--gpus=count={gpu_count}")
 
-    allocated_ports = {}
-    for container_port, host_port_def in (params.ports or {}).items():
-        host_port = str(
-            host_port_def if str(host_port_def).lower() != "auto" else get_free_port()
-        )
-        docker_command.extend(["-p", f"{host_port}:{container_port}"])
-        allocated_ports[container_port] = host_port
+    # Используем предвыделенные порты или выделяем новые
+    if preallocated_ports:
+        logger.info(f"Using preallocated ports: {preallocated_ports}")
+        allocated_ports = preallocated_ports.copy()
+    else:
+        logger.info("Allocating new ports...")
+        allocated_ports = {}
+        for container_port, host_port_def in (params.ports or {}).items():
+            host_port = str(
+                host_port_def if str(host_port_def).lower() != "auto" else get_free_port()
+            )
+            allocated_ports[container_port] = host_port
+        
+        if params.ssh_enabled and "22" not in (params.ports or {}):
+            host_ssh_port = str(get_free_port())
+            allocated_ports["22"] = host_ssh_port
 
+    # Добавляем порты в docker команду
+    for container_port, host_port in allocated_ports.items():
+        docker_command.extend(["-p", f"{host_port}:{container_port}"])
+        logger.info(f"  Mapping port: {container_port} -> {host_port}")
+
+    # Добавляем переменные окружения
     for key, value in env_vars.items():
         if not key or not isinstance(key, str):
             continue
         docker_command.extend(["-e", f"{key}={value}"])
-
-    if params.ssh_enabled and "22" not in (params.ports or {}):
-        host_ssh_port = str(get_free_port())
-        docker_command.extend(["-p", f"{host_ssh_port}:22"])
-        allocated_ports["22"] = host_ssh_port
 
     docker_command.append(image_full_name)
     
