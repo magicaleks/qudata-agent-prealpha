@@ -89,8 +89,8 @@ def collect_host_info() -> CreateHost:
 
         host_info = CreateHost(
             gpu_name=format_gpu_name(gpu_name),
-            gpu_amount=gpu_amount,
-            vram=vram,
+            gpu_amount=gpu_amount or 1,
+            vram=vram or 4,
             location=Location(),
             configuration=ConfigurationData(
                 ram=UnitValue(amount=round(mem.total / (1024**3), 2)),
