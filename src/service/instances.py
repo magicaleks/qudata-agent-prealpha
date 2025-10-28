@@ -107,9 +107,19 @@ def create_new_instance(
 
     docker_command.append(image_full_name)
     
-    # Если команда не передана, запускаем контейнер в idle режиме
+    # Обработка команды для запуска в контейнере
     if params.command:
-        docker_command.extend(params.command.split())
+        # Если команда содержит shell операторы (&&, ||, |, ;, etc.), оборачиваем в sh -c
+        shell_operators = ["&&", "||", "|", ";", ">", "<", "$(", "`"]
+        needs_shell = any(op in params.command for op in shell_operators)
+        
+        if needs_shell:
+            logger.info(f"Command contains shell operators, wrapping in 'sh -c': {params.command}")
+            docker_command.extend(["sh", "-c", params.command])
+        else:
+            # Простая команда без операторов - можно разбить по пробелам
+            docker_command.extend(params.command.split())
+            logger.info(f"Simple command: {params.command}")
     else:
         # Используем tail -f /dev/null для поддержания контейнера в рабочем состоянии
         docker_command.extend(["tail", "-f", "/dev/null"])
